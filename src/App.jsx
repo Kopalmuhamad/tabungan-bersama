@@ -1,13 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css'
 
 function App() {
+
+  const [submitMessage, setSubmitMessage] = useState(false)
+  const [submitStatus, setSubmitStatus] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+
   const scriptURL =
     "https://script.google.com/macros/s/AKfycbz-fLO5SZvlegoPA3hxURrsTNFyGpBqg7oRpT8FR7mhbmAMaBSAA68D88Ec0gDp1Sz6gw/exec";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     const form = e.target;
+
+    setIsLoading(true); // Aktifkan loading
 
     try {
       const response = await fetch(scriptURL, {
@@ -17,11 +24,20 @@ function App() {
 
       if (response.ok) {
         console.log("Success!", response);
+        alert('Success seng!!!')
+        setSubmitStatus('Success!')
+        setSubmitMessage('Data berhasil dikirimkan ke Google Sheets')
+        form.reset()
       } else {
         console.error("Error!", response.statusText);
+        setSubmitStatus('error!')
+        setSubmitMessage(`Error: ${response.statusText}`)
       }
     } catch (error) {
-      console.error("Error!", error.message);
+      setSubmitStatus('error!')
+      setSubmitMessage(`Error: ${error.message}`)
+    } finally {
+      setIsLoading(false); // Nonaktifkan loading setelah pengiriman selesai
     }
   };
 
@@ -36,7 +52,10 @@ function App() {
           <label htmlFor="nominal" className='label'>Nominal : </label>
           <input name="nominal" type="number" placeholder="Nominal" required />
         </div>
-        <button className='cta' type="submit">Send</button>
+        <button className='cta' type="submit" disabled={isLoading}>
+          {isLoading ? 'Sending...' : 'Send'}
+        </button>
+
       </form>
     </>
   );
